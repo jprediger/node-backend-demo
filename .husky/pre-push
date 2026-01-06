@@ -4,4 +4,6 @@
 cd backend || exit 1
 
 # build + testes com cobertura (ajuste se quiser algo mais leve)
+echo "Pre-push hook executando..."
 pnpm test
+echo "Pre-push hook concluído"
