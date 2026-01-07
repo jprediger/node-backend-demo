@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import { join } from 'node:path';
 
 import AutoLoad, { AutoloadPluginOptions } from '@fastify/autoload';
@@ -24,10 +25,9 @@ const app: FastifyPluginAsync<AppOptions> = async (
     options: opts,
   });
 
-  // This loads all plugins defined in routes
-  // define your routes in one of these
+  // This loads all modules (routes + business logic)
   void fastify.register(AutoLoad, {
-    dir: join(__dirname, 'routes'),
+    dir: join(__dirname, 'modules'),
     options: opts,
   });
 };

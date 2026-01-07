@@ -1,0 +1,52 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: backend_demo
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d backend_demo"]
+      interval: 2s
+      timeout: 5s
+      retries: 30
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.dev
+    env_file:
+      - ./backend/.env
+    environment:
+      # Overrides para Docker (o host do DB é "db", não "localhost")
+      DATABASE_URL: postgresql://postgres:postgres@db:5432/backend_demo
+      GOOGLE_APPLICATION_CREDENTIALS: /creds/orbital-demo-483617-ab6cf447a418.json
+      FASTIFY_ADDRESS: 0.0.0.0
+      FASTIFY_PORT: 8080
+    ports:
+      - "8080:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      # Live code in container
+      - ./backend:/app
+      # Keep container deps isolated from bind-mount
+      - /app/node_modules
+      # GCP service account JSON (read-only)
+      - ./backend/orbital-demo-483617-ab6cf447a418.json:/creds/orbital-demo-483617-ab6cf447a418.json:ro
+    command: >
+      bash -lc
+      "pnpm prisma generate
+      && pnpm -s build:ts
+      && pnpm prisma migrate deploy
+      && pnpm -s dev:start"
+
+volumes:
+  db_data:
+
+

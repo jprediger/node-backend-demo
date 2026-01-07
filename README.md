@@ -1,5 +1,35 @@
 # Backend Developer — Node.js
 
+## Setup do Ambiente de Desenvolvimento (Docker)
+
+**Pré-requisitos:** Docker + Docker Compose instalados.
+
+### Subir tudo (Postgres + Backend)
+
+```bash
+docker compose -f docker-compose.dev.yml up --build
+```
+
+O Compose vai:
+1. Subir um container Postgres 16 (porta `5432`)
+2. Aguardar o banco ficar pronto (healthcheck)
+3. Rodar `prisma migrate deploy` (migrations automáticas)
+4. Iniciar o Fastify em `http://localhost:8080`
+
+### Derrubar os containers
+
+```bash
+docker compose -f docker-compose.dev.yml down
+```
+
+### Limpar completamente (incluindo volumes do banco)
+
+```bash
+docker compose -f docker-compose.dev.yml down -v
+```
+
+---
+
 Desenvolver uma aplicação backend completa com **autenticação**, **CRUD de produtos** e **boas práticas de arquitetura**, utilizando **Fastify ou NestJS** (um dos dois é obrigatório; dominar ambos é um diferencial).
 
 O objetivo é avaliar sua capacidade de:
