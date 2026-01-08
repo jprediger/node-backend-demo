@@ -17,7 +17,12 @@ O backend utiliza Docker para subir a API, Banco de Dados (Postgres), Redis e Wo
    cd backend
    ```
 
-2. Suba os containers:
+2. Instalar dependências locais e prisma generate para garantir que não ocorram erros de type (validações husky)
+   ```bash
+    pnpm install && npx prisma generate
+   ```
+
+3. Suba os containers:
    ```bash
    docker compose -f docker-compose.dev.yml up --build
    ```
