@@ -29,15 +29,13 @@ services:
 
   backend:
     build:
-      context: ./backend
+      context: ./
       dockerfile: Dockerfile.dev
     env_file:
-      - ./backend/.env
+      - ./.env
     environment:
       # Overrides para Docker (o host do DB é "db", não "localhost")
       DATABASE_URL: postgresql://postgres:postgres@db:5432/backend_demo
-      REDIS_URL: redis://redis:6379
-      GOOGLE_APPLICATION_CREDENTIALS: /creds/orbital-demo-483617-ab6cf447a418.json
       FASTIFY_ADDRESS: 0.0.0.0
       FASTIFY_PORT: 8080
     ports:
@@ -49,16 +47,39 @@ services:
         condition: service_healthy
     volumes:
       # Live code in container
-      - ./backend:/app
+      - ./:/app
       # Keep container deps isolated from bind-mount
       - /app/node_modules
       # GCP service account JSON (read-only)
-      - ./backend/orbital-demo-483617-ab6cf447a418.json:/creds/orbital-demo-483617-ab6cf447a418.json:ro
+      - ./orbital-demo-483617-ab6cf447a418.json:/creds/orbital-demo-483617-ab6cf447a418.json:ro
     command: >
       bash -lc
       "pnpm prisma generate
       && pnpm prisma migrate deploy
       && pnpm dev"
+
+  worker:
+    build:
+      context: ./
+      dockerfile: Dockerfile.dev
+    env_file:
+      - ./.env
+    environment:
+      # Worker config
+      RUN_IMAGE_WORKER: "true"
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./:/app
+      - /app/node_modules
+      - ./orbital-demo-483617-ab6cf447a418.json:/creds/orbital-demo-483617-ab6cf447a418.json:ro
+    command: >
+      bash -lc
+      "pnpm prisma generate
+      && npx ts-node src/worker.ts"
 
 volumes:
   db_data:

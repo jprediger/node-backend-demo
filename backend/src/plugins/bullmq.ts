@@ -40,26 +40,36 @@ const bullmqPlugin: FastifyPluginAsync = fp(
       { connection }
     );
 
-    // Create worker with injected dependencies
-    const processor = createImageProcessor({
-      log: fastify.log,
-      prisma: fastify.prisma,
-      gcs: fastify.gcs,
-    });
+    // Create worker only if enabled via environment variable
+    const shouldRunWorker = process.env.RUN_IMAGE_WORKER === 'true';
+    let worker: Worker<ImageProcessingJobData> | undefined;
 
-    const worker = new Worker<ImageProcessingJobData>(
-      'image-processing',
-      processor,
-      { connection }
-    );
+    if (shouldRunWorker) {
+      // Create worker with injected dependencies
+      const processor = createImageProcessor({
+        log: fastify.log,
+        prisma: fastify.prisma,
+        gcs: fastify.gcs,
+      });
 
-    worker.on('completed', (job) => {
-      fastify.log.info({ jobId: job.id }, 'Job completed successfully');
-    });
+      worker = new Worker<ImageProcessingJobData>(
+        'image-processing',
+        processor,
+        { connection }
+      );
 
-    worker.on('failed', (job, err) => {
-      fastify.log.error({ jobId: job?.id, error: err.message }, 'Job failed');
-    });
+      worker.on('completed', (job) => {
+        fastify.log.info({ jobId: job.id }, 'Job completed successfully');
+      });
+
+      worker.on('failed', (job, err) => {
+        fastify.log.error({ jobId: job?.id, error: err.message }, 'Job failed');
+      });
+
+      fastify.log.info('Image worker started and listening for jobs');
+    } else {
+      fastify.log.info('Image worker is disabled in this instance');
+    }
 
     // Decorate Fastify instance
     fastify.decorate('bullmq', { imageProcessingQueue });
@@ -84,7 +94,9 @@ const bullmqPlugin: FastifyPluginAsync = fp(
 
     // Cleanup on shutdown
     fastify.addHook('onClose', async () => {
-      await worker.close();
+      if (worker) {
+        await worker.close();
+      }
       await imageProcessingQueue.close();
     });
   },
