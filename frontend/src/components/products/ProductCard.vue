@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import type { Product } from '@/types'
 import { useProductsStore } from '@/stores/products'
 import Button from 'primevue/button'
@@ -18,12 +18,33 @@ const productsStore = useProductsStore()
 const thumbnailUrl = ref<string | null>(null)
 const loadingImage = ref(true)
 
-onMounted(async () => {
+async function resolveThumbnail() {
+  loadingImage.value = true
+
+  // Preferred: backend already returns signed URL in the list response (no extra requests).
+  if (props.product.thumbnailUrl) {
+    thumbnailUrl.value = props.product.thumbnailUrl
+    loadingImage.value = false
+    return
+  }
+
+  // Backward-compatible fallback: fetch signed URL per product if only the path exists.
   if (props.product.thumbnailPath) {
     thumbnailUrl.value = await productsStore.getProductThumbnailUrl(props.product.id)
+  } else {
+    thumbnailUrl.value = null
   }
+
   loadingImage.value = false
-})
+}
+
+onMounted(resolveThumbnail)
+watch(
+  () => props.product.thumbnailUrl,
+  () => {
+    void resolveThumbnail()
+  }
+)
 
 function formatDate(dateString: string): string {
   return new Date(dateString).toLocaleDateString('pt-BR', {

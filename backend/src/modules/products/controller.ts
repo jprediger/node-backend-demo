@@ -18,8 +18,22 @@ export function productsController(deps: {
   service: ReturnType<typeof productsService>;
 }) {
   return {
-    list: async () => {
-      return deps.service.list();
+    list: async (request: FastifyRequest) => {
+      const products = await deps.service.list();
+
+      // Avoid extra per-product API calls from the frontend by embedding signed thumbnail URLs
+      // directly in the list response.
+      return Promise.all(
+        products.map(async (product) => {
+          const thumbnailUrl = product.thumbnailPath
+            ? await request.server.gcsSignReadUrl({
+                objectPath: product.thumbnailPath,
+              })
+            : null;
+
+          return { ...product, thumbnailUrl };
+        })
+      );
     },
 
     getById: async (

@@ -15,6 +15,7 @@ export interface Product {
   category: string
   imagePath: string | null
   thumbnailPath: string | null
+  thumbnailUrl?: string | null
   authorId: string
   createdAt: string
   updatedAt: string
