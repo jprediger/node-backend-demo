@@ -1,32 +1,76 @@
 # Backend Developer — Node.js
 
-## Setup do Ambiente de Desenvolvimento (Docker)
+## Como Rodar o Projeto (Passo a Passo)
 
-**Pré-requisitos:** Docker + Docker Compose instalados.
+Este repositório é um monorepo contendo `backend` e `frontend`. Siga os passos abaixo para rodar a aplicação completa.
 
-### Subir tudo (Postgres + Backend)
+### 1. Raiz (Husky)
 
-```bash
-docker compose -f docker-compose.dev.yml up --build
-```
+1. Rodar ```pnpm i``` na pasta raiz do repositório 
 
-O Compose vai:
-1. Subir um container Postgres 16 (porta `5432`)
-2. Aguardar o banco ficar pronto (healthcheck)
-3. Rodar `prisma migrate deploy` (migrations automáticas)
-4. Iniciar o Fastify em `http://localhost:8080`
+### 2. Backend e Serviços (Docker)
 
-### Derrubar os containers
+O backend utiliza Docker para subir a API, Banco de Dados (Postgres), Redis e Workers.
 
-```bash
-docker compose -f docker-compose.dev.yml down
-```
+1. Acesse a pasta do backend:
+   ```bash
+   cd backend
+   ```
 
-### Limpar completamente (incluindo volumes do banco)
+2. Suba os containers:
+   ```bash
+   docker compose -f docker-compose.dev.yml up --build
+   ```
 
-```bash
-docker compose -f docker-compose.dev.yml down -v
-```
+   O Compose vai:
+   - Subir um container Postgres 16 (porta `5432`)
+   - Subir um container Redis (porta `6379`)
+   - Rodar `prisma migrate deploy` (migrations automáticas)
+   - Iniciar o Fastify em `http://localhost:8080`
+
+### 3. Frontend (Vue.js)
+
+O frontend é uma aplicação Vue.js que consome a API do backend.
+
+1. Em um novo terminal, acesse a pasta do frontend (partindo da raiz do projeto):
+   ```bash
+   cd frontend
+   ```
+
+2. Instale as dependências:
+   ```bash
+   pnpm install
+   # ou npm install
+   ```
+
+3. Configure as variáveis de ambiente:
+   ```bash
+   cp .env.example .env
+   ```
+
+4. Rode a aplicação:
+   ```bash
+   pnpm dev
+   ```
+
+5. Acesse no navegador:
+   - Geralmente em `http://localhost:5173` (verifique o output do terminal).
+
+---
+
+### Comandos Úteis (Docker)
+
+- **Derrubar os containers:**
+  ```bash
+  # dentro da pasta backend
+  docker compose -f docker-compose.dev.yml down
+  ```
+
+- **Limpar tudo (incluindo dados do banco):**
+  ```bash
+  # dentro da pasta backend
+  docker compose -f docker-compose.dev.yml down -v
+  ```
 
 ---
 
