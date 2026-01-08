@@ -3,7 +3,6 @@ import { ref, watch, computed } from 'vue'
 import type { Product, CreateProductInput, UpdateProductInput } from '@/types'
 import { useAuthStore } from '@/stores/auth'
 import { useProductsStore } from '@/stores/products'
-import { useImageUpload } from '@/composables/useImageUpload'
 import InputText from 'primevue/inputtext'
 import Textarea from 'primevue/textarea'
 import Button from 'primevue/button'
@@ -16,12 +15,12 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   submit: [data: CreateProductInput | UpdateProductInput]
+  fileChange: [file: File | null]
   cancel: []
 }>()
 
 const authStore = useAuthStore()
 const productsStore = useProductsStore()
-const { uploading, progress, error: uploadError, uploadImage, reset: resetUpload } = useImageUpload()
 
 const name = ref('')
 const category = ref('')
@@ -62,15 +61,17 @@ function resetForm() {
   description.value = ''
   selectedFile.value = null
   currentImageUrl.value = null
-  resetUpload()
+  emit('fileChange', null)
 }
 
 function handleFileSelect(file: File) {
   selectedFile.value = file
+  emit('fileChange', file)
 }
 
 function handleFileRemove() {
   selectedFile.value = null
+  emit('fileChange', null)
 }
 
 async function handleSubmit() {
@@ -84,16 +85,6 @@ async function handleSubmit() {
     // Update product
     const updateData: UpdateProductInput = { ...baseData }
     emit('submit', updateData)
-
-    // If new file selected, upload after product update
-    if (selectedFile.value && props.product) {
-      const result = await uploadImage(props.product.id, selectedFile.value)
-      if (result.success && result.objectPath) {
-        await productsStore.updateProduct(props.product.id, {
-          imagePath: result.objectPath,
-        })
-      }
-    }
   } else {
     // Create product
     const createData: CreateProductInput = {
@@ -145,9 +136,9 @@ async function handleSubmit() {
     <div class="form-field">
       <label class="form-label">Imagem</label>
       <ImageUploader
-        :uploading="uploading"
-        :progress="progress"
-        :error="uploadError"
+        :uploading="false"
+        :progress="0"
+        :error="null"
         :current-image-url="currentImageUrl"
         @select="handleFileSelect"
         @remove="handleFileRemove"
@@ -160,13 +151,13 @@ async function handleSubmit() {
         label="Cancelar"
         severity="secondary"
         outlined
-        :disabled="loading || uploading"
+        :disabled="loading"
         @click="emit('cancel')"
       />
       <Button
         type="submit"
         :label="isEditing ? 'Salvar' : 'Criar Produto'"
-        :loading="loading || uploading"
+        :loading="loading"
         :disabled="!canSubmit"
       />
     </div>

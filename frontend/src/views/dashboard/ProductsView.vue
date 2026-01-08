@@ -184,6 +184,7 @@ function confirmDeleteProduct(product: Product) {
         :product="editingProduct"
         :loading="formLoading"
         @submit="handleFormSubmit"
+        @fileChange="pendingFile = $event"
         @cancel="closeFormDialog"
       />
     </Dialog>
