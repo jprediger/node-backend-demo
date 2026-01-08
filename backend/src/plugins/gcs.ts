@@ -27,6 +27,7 @@ declare module 'fastify' {
 const gcsPlugin: FastifyPluginAsync = fp(
   async (fastify) => {
     const bucketName = process.env.GCS_BUCKET;
+
     const defaultExpiresInSeconds = Number(
       process.env.GCS_SIGNED_URL_TTL_SECONDS ?? '600'
     );
@@ -35,7 +36,14 @@ const gcsPlugin: FastifyPluginAsync = fp(
       throw new Error('GCS_BUCKET is not configured');
     }
 
-    const storage = new Storage();
+    const credentialsRaw = process.env.GCP_SA_JSON;
+    if (!credentialsRaw) throw new Error('GCP_SA_JSON is not configured');
+
+    const credentials = JSON.parse(credentialsRaw);
+    const storage = new Storage({
+      projectId: credentials.project_id,
+      credentials,
+    });
 
     fastify.decorate('gcs', { bucketName, storage });
 
