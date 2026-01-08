@@ -1,9 +1,0 @@
-[build]
-builder = "nixpacks"
-startCommand = "pnpm prisma migrate deploy && fastify start -l info -a 0.0.0.0 dist/src/app.js"
-
-[deploy]
-startCommand = "fastify start -l info -a 0.0.0.0 dist/src/app.js"
-healthcheckPath = "/"
-healthcheckTimeout = 100
-

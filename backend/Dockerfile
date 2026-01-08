@@ -11,11 +11,17 @@ RUN corepack enable
 COPY package.json pnpm-lock.yaml ./
 RUN pnpm install --frozen-lockfile
 
-COPY . .
-RUN pnpm prisma generate && pnpm run build:ts
+COPY prisma ./prisma/
+COPY prisma.config.ts ./
+COPY tsconfig.json ./
+COPY src ./src/
 
-# --- Production stage ---
-FROM node:20-bookworm-slim
+# Gera tipos do Prisma antes do tsc
+RUN pnpm prisma generate
+RUN pnpm run build:ts
+
+
+FROM node:20-bookworm-slim AS runner
 
 WORKDIR /app
 
@@ -28,10 +34,13 @@ RUN corepack enable
 COPY package.json pnpm-lock.yaml ./
 RUN pnpm install --frozen-lockfile --prod
 
+COPY prisma ./prisma/
+COPY prisma.config.ts ./
+RUN pnpm prisma generate
+
 COPY --from=builder /app/dist ./dist
-COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
 
 EXPOSE 8080
 
-CMD ["node", "node_modules/fastify-cli/cli.js", "start", "-l", "info", "-a", "0.0.0.0", "dist/src/app.js"]
-
+# Use PORT do Railway (ou 8080 local)
+CMD ["sh", "-c", "pnpm prisma migrate deploy && node node_modules/fastify-cli/cli.js start -l info -a 0.0.0.0 -p ${PORT:-8080} dist/src/app.js"]
