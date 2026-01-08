@@ -34,7 +34,6 @@ services:
     env_file:
       - ./.env
     environment:
-      # Overrides para Docker (o host do DB é "db", não "localhost")
       DATABASE_URL: postgresql://postgres:postgres@db:5432/backend_demo
       FASTIFY_ADDRESS: 0.0.0.0
       FASTIFY_PORT: 8080
@@ -50,8 +49,6 @@ services:
       - ./:/app
       # Keep container deps isolated from bind-mount
       - /app/node_modules
-      # GCP service account JSON (read-only)
-      - ./orbital-demo-483617-ab6cf447a418.json:/creds/orbital-demo-483617-ab6cf447a418.json:ro
     command: >
       bash -lc
       "pnpm prisma generate
@@ -75,7 +72,6 @@ services:
     volumes:
       - ./:/app
       - /app/node_modules
-      - ./orbital-demo-483617-ab6cf447a418.json:/creds/orbital-demo-483617-ab6cf447a418.json:ro
     command: >
       bash -lc
       "pnpm prisma generate

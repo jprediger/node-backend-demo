@@ -58,4 +58,5 @@ profile*
 *flamegraph*
 
 .env
-.env*
+.env.*
+!.env.example
