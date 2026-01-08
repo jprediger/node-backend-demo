@@ -5,7 +5,7 @@ import gcsPlugin from './plugins/gcs';
 import bullmqPlugin from './plugins/bullmq';
 
 async function main() {
-  // Ensure worker logic is enabled
+  // Habilita worker
   process.env.RUN_IMAGE_WORKER = 'true';
 
   const app = Fastify({
@@ -20,18 +20,17 @@ async function main() {
   try {
     app.log.info('Starting worker process...');
 
-    // Register necessary plugins
-    // These plugins provide the dependencies (prisma, gcs) needed by the worker
+    // Plugins necessários (prisma, gcs, bullmq)
     await app.register(prismaPlugin);
     await app.register(gcsPlugin);
     await app.register(bullmqPlugin);
 
-    // Wait for plugins to be ready
+    // Aguarda plugins
     await app.ready();
 
     app.log.info('Worker process is running and processing jobs...');
 
-    // Graceful shutdown
+    // Finalização graciosa
     const signals = ['SIGINT', 'SIGTERM'] as const;
     signals.forEach((signal) => {
       process.on(signal, async () => {

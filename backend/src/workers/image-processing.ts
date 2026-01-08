@@ -4,7 +4,7 @@ import { Storage } from '@google-cloud/storage';
 import sharp from 'sharp';
 import path from 'path';
 
-// Thumbnail configuration
+// Config de thumbnail
 const THUMBNAIL_CONFIG = {
   width: 300,
   height: 300,
@@ -12,7 +12,7 @@ const THUMBNAIL_CONFIG = {
   quality: 80,
 };
 
-// Job data type for image processing
+// Payload do job de imagem
 export type ImageProcessingJobData = {
   bucket: string;
   objectPath: string;
@@ -26,15 +26,12 @@ export type ImageProcessingDeps = {
 };
 
 /**
- * Generates the thumbnail path from the original image path.
- * Example: "uploads/originals/{id}/image.jpg" -> "uploads/thumbnails/{id}/image.webp"
+ * Gera o path do thumbnail a partir do original.
  */
 function getThumbnailPath(objectPath: string): string {
   const ext = path.extname(objectPath);
   const baseName = path.basename(objectPath, ext);
-  // Map originals prefix to thumbnails prefix.
-  // Keeping thumbnails under a different prefix prevents webhook loops when using
-  // GCS notifications filtered by --object-prefix=uploads/originals/
+  // Usa prefixo diferente para evitar loops de webhook
   if (!objectPath.startsWith('uploads/originals/')) {
     throw new Error(
       `Invalid original objectPath. Expected prefix "uploads/originals/": ${objectPath}`
@@ -54,8 +51,7 @@ function getThumbnailPath(objectPath: string): string {
 }
 
 /**
- * Creates the image processing worker processor function.
- * Separated from the plugin for better testability and organization.
+ * Cria o processor do worker.
  */
 export function createImageProcessor(
   deps: ImageProcessingDeps

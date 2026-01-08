@@ -21,8 +21,6 @@ export function productsController(deps: {
     list: async (request: FastifyRequest) => {
       const products = await deps.service.list();
 
-      // Avoid extra per-product API calls from the frontend by embedding signed thumbnail URLs
-      // directly in the list response.
       return Promise.all(
         products.map(async (product) => {
           const thumbnailUrl = product.thumbnailPath

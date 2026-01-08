@@ -11,21 +11,18 @@ import { replyBadRequestFromZod } from '../../utils/zod';
 
 export function webhooksController() {
   return {
-    /**
-     * Handles GCS Pub/Sub push notifications.
-     * Called by Google Cloud Pub/Sub when an object is created/modified in GCS.
-     */
+    // Webhook do Pub/Sub do GCS (push)
     gcsNotification: async (
       request: FastifyRequest<{ Body: PubSubMessage }>,
       reply: FastifyReply
     ) => {
-      // Parse Pub/Sub envelope
+      // Valida envelope Pub/Sub
       const parsedBody = PubSubMessageSchema.safeParse(request.body);
       if (!parsedBody.success) {
         return replyBadRequestFromZod(reply, parsedBody.error);
       }
 
-      // Decode base64 data
+      // Decodifica base64
       let decodedData: unknown;
       try {
         const jsonString = Buffer.from(
@@ -38,7 +35,7 @@ export function webhooksController() {
         return { message: 'Invalid base64 or JSON in message.data' };
       }
 
-      // Parse GCS object data
+      // Valida payload do GCS
       const parsedGcsData = GcsObjectDataSchema.safeParse(decodedData);
       if (!parsedGcsData.success) {
         request.log.warn({ decodedData }, 'Invalid GCS object data format');
@@ -65,7 +62,7 @@ export function webhooksController() {
         return { message: 'Could not extract productId from object path' };
       }
 
-      // Enqueue image processing job
+      // Enfileira processamento de imagem
       await request.server.enqueueImageProcessing({
         bucket,
         objectPath,
@@ -75,15 +72,12 @@ export function webhooksController() {
       return { message: 'Job enqueued' };
     },
 
-    /**
-     * Simulates a GCS Pub/Sub notification for local testing.
-     * Only available in development mode.
-     */
+    // Simula notificação do GCS em dev
     simulateGcsNotification: async (
       request: FastifyRequest<{ Body: SimulateGcsWebhookBody }>,
       reply: FastifyReply
     ) => {
-      // Only allow in development
+      // Só em ambiente de desenvolvimento
       if (process.env.NODE_ENV === 'production') {
         reply.code(404);
         return { message: 'Not found' };
@@ -96,13 +90,13 @@ export function webhooksController() {
 
       const { bucket, objectPath } = parsedBody.data;
 
-      // Only process originals (uploads/originals/...) to match production behavior.
+      // Só originais (uploads/originals/...)
       if (!objectPath.startsWith('uploads/originals/')) {
         reply.code(400);
         return { message: 'objectPath must start with "uploads/originals/"' };
       }
 
-      // Extract productId from path: uploads/originals/{productId}/{filename}
+      // Extrai productId do path
       const pathParts = objectPath.split('/');
       const productId = pathParts[2];
 
@@ -111,7 +105,7 @@ export function webhooksController() {
         return { message: 'Could not extract productId from objectPath' };
       }
 
-      // Enqueue image processing job
+      // Enfileira processamento
       const job = await request.server.enqueueImageProcessing({
         bucket,
         objectPath,

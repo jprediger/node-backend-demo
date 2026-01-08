@@ -26,7 +26,7 @@ const bullmqPlugin: FastifyPluginAsync = fp(
       throw new Error('REDIS_URL is not configured');
     }
 
-    // Parse Redis URL for connection options
+    // Lê URL do Redis
     const url = new URL(redisUrl);
     const connection: ConnectionOptions = {
       host: url.hostname,
@@ -40,12 +40,12 @@ const bullmqPlugin: FastifyPluginAsync = fp(
       { connection }
     );
 
-    // Create worker only if enabled via environment variable
+    // Só cria worker se habilitado via env
     const shouldRunWorker = process.env.RUN_IMAGE_WORKER === 'true';
     let worker: Worker<ImageProcessingJobData> | undefined;
 
     if (shouldRunWorker) {
-      // Create worker with injected dependencies
+      // Cria worker com deps do Fastify
       const processor = createImageProcessor({
         log: fastify.log,
         prisma: fastify.prisma,
@@ -71,7 +71,7 @@ const bullmqPlugin: FastifyPluginAsync = fp(
       fastify.log.info('Image worker is disabled in this instance');
     }
 
-    // Decorate Fastify instance
+    // Decorate Fastify
     fastify.decorate('bullmq', { imageProcessingQueue });
 
     fastify.decorate(
@@ -92,7 +92,7 @@ const bullmqPlugin: FastifyPluginAsync = fp(
       }
     );
 
-    // Cleanup on shutdown
+    // Finalização
     fastify.addHook('onClose', async () => {
       if (worker) {
         await worker.close();
