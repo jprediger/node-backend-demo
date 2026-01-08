@@ -94,7 +94,12 @@ export function productsService(deps: {
     },
 
     async createImageObjectPath(productId: string, contentType: string) {
-      // Minimal mapping; you can expand this later.
+      console.log('createImageObjectPath', productId, contentType);
+      const existing = await deps.repo.findRawById(productId);
+      if (!existing) {
+        throw new Error('Product not found');
+      }
+
       const ext =
         contentType === 'image/jpeg'
           ? 'jpg'

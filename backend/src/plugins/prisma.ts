@@ -14,15 +14,20 @@ declare module 'fastify' {
 const connectionString = `${process.env.DATABASE_URL}`;
 const adapter = new PrismaPg({ connectionString });
 
-const prismaPlugin: FastifyPluginAsync = fp(async (fastify) => {
-  const prisma = new PrismaClient({ adapter });
-  await prisma.$connect();
+const prismaPlugin: FastifyPluginAsync = fp(
+  async (fastify) => {
+    const prisma = new PrismaClient({ adapter });
+    await prisma.$connect();
 
-  fastify.decorate('prisma', prisma);
+    fastify.decorate('prisma', prisma);
 
-  fastify.addHook('onClose', async (server) => {
-    await server.prisma.$disconnect();
-  });
-});
+    fastify.addHook('onClose', async (server) => {
+      await server.prisma.$disconnect();
+    });
+  },
+  {
+    name: 'prisma',
+  }
+);
 
 export default prismaPlugin;
