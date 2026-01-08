@@ -27,16 +27,30 @@ export type ImageProcessingDeps = {
 
 /**
  * Generates the thumbnail path from the original image path.
- * Example: "products/{id}/original/image.jpg" -> "products/{id}/thumbnails/image.webp"
+ * Example: "uploads/originals/{id}/image.jpg" -> "uploads/thumbnails/{id}/image.webp"
  */
 function getThumbnailPath(objectPath: string): string {
   const ext = path.extname(objectPath);
   const baseName = path.basename(objectPath, ext);
-  // Replace /original/ with /thumbnails/ in the path
-  const thumbnailDir = path
-    .dirname(objectPath)
-    .replace('/original', '/thumbnails');
-  return path.join(thumbnailDir, `${baseName}.webp`);
+  // Map originals prefix to thumbnails prefix.
+  // Keeping thumbnails under a different prefix prevents webhook loops when using
+  // GCS notifications filtered by --object-prefix=uploads/originals/
+  if (!objectPath.startsWith('uploads/originals/')) {
+    throw new Error(
+      `Invalid original objectPath. Expected prefix "uploads/originals/": ${objectPath}`
+    );
+  }
+
+  // uploads/originals/{productId}/{filename} -> uploads/thumbnails/{productId}/
+  const parts = objectPath.split('/');
+  const productId = parts[2];
+  if (!productId) {
+    throw new Error(
+      `Could not extract productId from objectPath: ${objectPath}`
+    );
+  }
+
+  return `uploads/thumbnails/${productId}/${baseName}.webp`;
 }
 
 /**

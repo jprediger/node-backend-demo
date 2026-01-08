@@ -4,7 +4,7 @@ import { z } from 'zod';
 // https://cloud.google.com/storage/docs/pubsub-notifications#format
 export const GcsObjectDataSchema = z.object({
   kind: z.literal('storage#object'),
-  name: z.string(), // Object path, e.g., "products/abc123/original/image.jpg"
+  name: z.string(), // Object path, e.g., "uploads/originals/abc123/image.jpg"
   bucket: z.string(),
   eventType: z.string().optional(), // OBJECT_FINALIZE, OBJECT_DELETE, etc.
 });

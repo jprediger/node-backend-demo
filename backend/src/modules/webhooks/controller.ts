@@ -48,15 +48,13 @@ export function webhooksController() {
 
       const { bucket, name: objectPath } = parsedGcsData.data;
 
-      // Only process objects in "products/" path
-      if (!objectPath.startsWith('products/')) {
-        request.log.info({ objectPath }, 'Ignoring non-product object');
-        return { message: 'Ignored: not a product image' };
+      if (!objectPath.startsWith('uploads/originals/')) {
+        request.log.info({ objectPath }, 'Ignoring non-original upload object');
+        return { message: 'Ignored: not an original upload' };
       }
 
-      // Extract productId from path: products/{productId}/original/{filename}
       const pathParts = objectPath.split('/');
-      const productId = pathParts[1];
+      const productId = pathParts[2];
 
       if (!productId) {
         request.log.warn(
@@ -98,15 +96,15 @@ export function webhooksController() {
 
       const { bucket, objectPath } = parsedBody.data;
 
-      // Only process objects in "products/" path
-      if (!objectPath.startsWith('products/')) {
+      // Only process originals (uploads/originals/...) to match production behavior.
+      if (!objectPath.startsWith('uploads/originals/')) {
         reply.code(400);
-        return { message: 'objectPath must start with "products/"' };
+        return { message: 'objectPath must start with "uploads/originals/"' };
       }
 
-      // Extract productId from path: products/{productId}/original/{filename}
+      // Extract productId from path: uploads/originals/{productId}/{filename}
       const pathParts = objectPath.split('/');
-      const productId = pathParts[1];
+      const productId = pathParts[2];
 
       if (!productId) {
         reply.code(400);

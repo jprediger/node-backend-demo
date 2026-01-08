@@ -109,7 +109,7 @@ export function productsService(deps: {
               ? 'webp'
               : 'bin';
 
-      const objectPath = `products/${productId}/original/${randomUUID()}.${ext}`;
+      const objectPath = `uploads/originals/${productId}/${randomUUID()}.${ext}`;
 
       // Atualiza o imagePath no banco
       await deps.repo.update(productId, { imagePath: objectPath });
