@@ -17,7 +17,7 @@ COPY tsconfig.json ./
 COPY src ./src/
 
 # Gera tipos do Prisma antes do tsc
-RUN pnpm prisma generate
+RUN pnpm exec prisma generate
 RUN pnpm run build:ts
 
 
@@ -36,11 +36,11 @@ RUN pnpm install --frozen-lockfile --prod
 
 COPY prisma ./prisma/
 COPY prisma.config.ts ./
-RUN pnpm prisma generate
+RUN pnpm exec prisma generate
 
 COPY --from=builder /app/dist ./dist
 
 EXPOSE 8080
 
 # Use PORT do Railway (ou 8080 local)
-CMD ["sh", "-c", "pnpm prisma migrate deploy && node node_modules/fastify-cli/cli.js start -l info -a 0.0.0.0 -p ${PORT:-8080} dist/src/app.js"]
+CMD ["sh", "-c", "pnpm exec prisma migrate deploy && node node_modules/fastify-cli/cli.js start -l info -a 0.0.0.0 -p ${PORT:-8080} dist/src/app.js"]
