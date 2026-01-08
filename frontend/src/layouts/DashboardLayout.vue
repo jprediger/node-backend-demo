@@ -66,7 +66,7 @@ function navigateTo(path: string) {
     <aside class="sidebar">
       <div class="sidebar-brand">
         <i class="pi pi-box brand-icon"></i>
-        <span class="brand-text">ProductHub</span>
+        <span class="brand-text">Orbital Demo</span>
       </div>
 
       <nav class="sidebar-nav">
@@ -282,7 +282,8 @@ function navigateTo(path: string) {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 1.25rem 2rem;
+  height: var(--app-header-height);
+  padding: 0 var(--app-header-padding-x);
   background: rgba(15, 23, 42, 0.6);
   backdrop-filter: blur(10px);
   border-bottom: 1px solid rgba(71, 85, 105, 0.3);
@@ -291,11 +292,14 @@ function navigateTo(path: string) {
   z-index: 50;
 }
 
+:slotted(.page-title),
 .page-title {
   font-size: 1.5rem;
   font-weight: 600;
   color: #f1f5f9;
   margin: 0;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
 }
 
 .header-right {
@@ -341,6 +345,11 @@ function navigateTo(path: string) {
 
   .content-body {
     padding: 1rem;
+  }
+
+  .content-header {
+    height: var(--app-header-height-sm);
+    padding: 0 var(--app-header-padding-x-sm);
   }
 }
 </style>

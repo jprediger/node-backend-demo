@@ -199,13 +199,6 @@ function confirmDeleteProduct(product: Product) {
   min-height: 400px;
 }
 
-.page-title {
-  font-size: 1.5rem;
-  font-weight: 600;
-  color: #f1f5f9;
-  margin: 0;
-}
-
 :deep(.product-dialog .p-dialog) {
   background: #1e293b;
   border: 1px solid rgba(71, 85, 105, 0.3);

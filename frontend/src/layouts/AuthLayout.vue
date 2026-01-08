@@ -7,7 +7,7 @@
     <div class="auth-container">
       <div class="auth-brand">
         <i class="pi pi-box brand-icon"></i>
-        <h1 class="brand-title">ProductHub</h1>
+        <h1 class="brand-title">Orbital Demo</h1>
         <p class="brand-subtitle">Gerencie seus produtos com facilidade</p>
       </div>
       <div class="auth-card">
