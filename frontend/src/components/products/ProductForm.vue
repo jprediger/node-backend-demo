@@ -105,7 +105,7 @@ async function handleSubmit() {
         v-model="name"
         placeholder="Nome do produto"
         class="form-input"
-        :disabled="loading || uploading"
+        :disabled="loading"
       />
     </div>
 
@@ -116,7 +116,7 @@ async function handleSubmit() {
         v-model="category"
         placeholder="Ex: Eletrônicos, Roupas, etc."
         class="form-input"
-        :disabled="loading || uploading"
+        :disabled="loading"
       />
     </div>
 
@@ -127,7 +127,7 @@ async function handleSubmit() {
         v-model="description"
         placeholder="Descrição do produto (opcional)"
         class="form-input"
-        :disabled="loading || uploading"
+        :disabled="loading"
         rows="3"
         autoResize
       />
