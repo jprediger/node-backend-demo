@@ -1,6 +1,6 @@
 [build]
 builder = "nixpacks"
-buildCommand = "pnpm install && pnpm run build:ts && pnpm prisma generate"
+buildCommand = "pnpm install && pnpm prisma generate && pnpm run build:ts""
 
 [deploy]
 startCommand = "fastify start -l info -a 0.0.0.0 dist/src/app.js"
