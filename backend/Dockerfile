@@ -12,7 +12,7 @@ COPY package.json pnpm-lock.yaml ./
 RUN pnpm install --frozen-lockfile
 
 COPY . .
-RUN pnpm prisma generate && pnpm prisma migrate deploy && pnpm run build:ts
+RUN pnpm prisma generate && pnpm run build:ts
 
 # --- Production stage ---
 FROM node:20-bookworm-slim
