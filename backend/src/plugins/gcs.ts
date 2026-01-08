@@ -36,8 +36,9 @@ const gcsPlugin: FastifyPluginAsync = fp(
       throw new Error('GCS_BUCKET is not configured');
     }
 
-    const credentialsRaw = process.env.GCP_SA_JSON;
-    if (!credentialsRaw) throw new Error('GCP_SA_JSON is not configured');
+    const credentialsRaw = process.env.GOOGLE_APPLICATION_CREDENTIALS;
+    if (!credentialsRaw)
+      throw new Error('GOOGLE_APPLICATION_CREDENTIALS is not configured');
 
     const credentials = JSON.parse(credentialsRaw);
     const storage = new Storage({
